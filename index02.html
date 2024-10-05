@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego de Gusanito</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+      }
+      canvas {
+        background-color: #000;
+        border: 2px solid #333;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const boxSize = 20;
+      let snake = [{ x: 160, y: 160 }];
+      let direction = { x: 0, y: 0 };
+      let food = {
+        x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
+        y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
+      };
+      let score = 0;
+
+      // Dibujar el juego
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar la serpiente
+        snake.forEach((segment) => {
+          ctx.fillStyle = "lime";
+          ctx.fillRect(segment.x, segment.y, boxSize, boxSize);
+        });
+
+        // Dibujar la comida
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, boxSize, boxSize);
+      }
+
+      // Mover la serpiente
+      function moveSnake() {
+        const head = {
+          x: snake[0].x + direction.x,
+          y: snake[0].y + direction.y,
+        };
+
+        // Detectar colisión con las paredes
+        if (
+          head.x < 0 ||
+          head.x >= canvas.width ||
+          head.y < 0 ||
+          head.y >= canvas.height
+        ) {
+          resetGame();
+          return;
+        }
+
+        // Detectar colisión con sí misma
+        for (let i = 1; i < snake.length; i++) {
+          if (head.x === snake[i].x && head.y === snake[i].y) {
+            resetGame();
+            return;
+          }
+        }
+
+        snake.unshift(head);
+
+        // Comer la comida
+        if (head.x === food.x && head.y === food.y) {
+          score++;
+          food = {
+            x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
+            y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
+          };
+        } else {
+          snake.pop();
+        }
+      }
+
+      // Reiniciar el juego
+      function resetGame() {
+        alert("¡Juego terminado! Tu puntaje fue: " + score);
+        snake = [{ x: 160, y: 160 }];
+        direction = { x: 0, y: 0 };
+        score = 0;
+      }
+
+      // Controlar la serpiente
+      document.addEventListener("keydown", (event) => {
+        switch (event.key) {
+          case "ArrowUp":
+            if (direction.y === 0) direction = { x: 0, y: -boxSize };
+            break;
+          case "ArrowDown":
+            if (direction.y === 0) direction = { x: 0, y: boxSize };
+            break;
+          case "ArrowLeft":
+            if (direction.x === 0) direction = { x: -boxSize, y: 0 };
+            break;
+          case "ArrowRight":
+            if (direction.x === 0) direction = { x: boxSize, y: 0 };
+            break;
+        }
+      });
+
+      // Actualizar el juego
+      function updateGame() {
+        moveSnake();
+        draw();
+      }
+
+      setInterval(updateGame, 100);
+    </script>
+  </body>
+</html>
